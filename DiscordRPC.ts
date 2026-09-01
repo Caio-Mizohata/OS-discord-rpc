@@ -52,7 +52,7 @@ async function setActivity(): Promise<void> {
                 systemOS = execSync("sw_vers -productName").toString().trim();
                 archType = os.arch();
                 osVersion = execSync("sw_vers -productVersion").toString().trim();
-                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
+                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(0);
                 largeImageKey = "apple_m4";
                 smallImageKey = "apple";
             } catch {
