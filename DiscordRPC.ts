@@ -1,33 +1,90 @@
 import DiscordRPC from "discord-rpc";
 import os from "node:os";
 import { execSync } from "node:child_process";
+import dotenv from "dotenv";
 
-const MacOsFormat: Record<string, string> = {
-    'darwin': 'MacOS',
-    'win32': 'Windows',
-    'linux': 'Linux'
+dotenv.config({ quiet: true });
+
+// const platformFormat: Record<string, string> = {
+//   darwin: "macOS",
+//   win32: "Windows",
+//   linux: "Linux",
+// };
+
+const currentPlatform = os.platform();
+const SystemOS = os.version();
+const archType = os.arch();
+const CPU = os.cpus()[0]?.model?.trim();
+const OsVersion = os.release();
+const totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
+
+
+let osDetailedVersion: string | undefined;
+let largeImageKey: string | undefined;
+let smallImageKey: string | undefined;
+
+const AppID = process.env.APP_ID;
+if (!AppID) {
+    console.error("AppID não encontrado no arquivo .env, por favor, adicione o valor do seu AppID do Discord no arquivo .env");
+    console.log();
+    process.exit(1);
 }
-
-const SystemOS = MacOsFormat[os.type().toLowerCase()];
-const archType = os.arch().toLowerCase();
-const macVersion = execSync('sw_vers -productVersion').toString().trim();
-const CPU = os.cpus()[0]?.model;
-
-
-const clientID: string = "1543791636587216968";
 const rpc = new DiscordRPC.Client({ transport: "ipc" });
 
-async function setActivity() {
+async function setActivity(): Promise<void> {
     if (!rpc) return;
+
+    switch (currentPlatform) {
+        case "darwin": {
+            try {
+                osDetailedVersion = execSync("sw_vers -productVersion").toString().trim();
+                largeImageKey = "apple_m4";
+                smallImageKey = "apple";
+            } catch {
+                osDetailedVersion = os.release();
+                largeImageKey = undefined;
+                smallImageKey = undefined;
+            }
+            break;
+        }
+
+        case "win32": {
+            try {
+                osDetailedVersion = os.release();
+                largeImageKey = "windows";
+                smallImageKey = "microsoft";
+            } catch {
+                osDetailedVersion = os.release();
+                largeImageKey = undefined;
+                smallImageKey = undefined;
+            }
+            break;
+        }
+
+        case "linux": {
+            try {
+                const distroOutput = execSync(
+                    'source /etc/os-release && echo "$PRETTY_NAME"',
+                    { shell: "/bin/bash", encoding: "utf-8" }
+                );
+                osDetailedVersion = distroOutput.trim();
+            } catch {
+                osDetailedVersion = os.release();
+                largeImageKey = undefined;
+                smallImageKey = undefined;
+            }
+            break;
+        }
+    }
 
     await rpc.setActivity({
         details: `OS: ${SystemOS}`,
-        state: `Model: ${CPU}`,
-        largeImageKey: "apple_m4",
-        largeImageText: `Architeture: ${archType}`,
-        smallImageKey: "apple",
-        smallImageText: `OS Version ${macVersion}`,
-        startTimestamp: Date.now(),
+        state: `Total RAM: ${totalRam} GB`,
+        largeImageKey: largeImageKey,
+        largeImageText: `Architecture: ${archType}`,
+        smallImageKey: smallImageKey,
+        smallImageText: `OS Version: ${OsVersion}`,
+        startTimestamp: Math.floor(Date.now() - os.uptime() * 1000),
         instance: false,
     });
 }
@@ -39,4 +96,4 @@ rpc.on("ready", async () => {
     setInterval(setActivity, 15000);
 });
 
-rpc.login({ clientId: clientID }).catch(console.error);
+rpc.login({ clientId: AppID }).catch(console.error);
