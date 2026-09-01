@@ -11,6 +11,8 @@ let systemOS: string | undefined = undefined;
 let archType: string | undefined = undefined;
 let osVersion: string | undefined = undefined;
 let totalRam: string | undefined = undefined;
+
+let macOsName: string | undefined = undefined;
 let modelName: string | undefined = undefined;
 let appleChip: string | undefined = undefined;
 
@@ -46,15 +48,19 @@ async function setActivity(): Promise<void> {
                         // Remove espaços em branco
                         .map(field => field.trim()))
                 );
+                const getMacVersion = execSync("sw_vers -productVersion").toString().trim();
+                if (getMacVersion.includes("26") || getMacVersion.includes("25")) {
+                    macOsName = "Tahoe";
+                    largeImageKey = "apple_m4";
+                    smallImageKey = "apple";
+                }
 
+                systemOS = execSync("sw_vers -productName").toString().trim();
                 modelName = detailedMacModel["Model Name"];
                 appleChip = detailedMacModel["Chip"];
-                systemOS = execSync("sw_vers -productName").toString().trim();
                 archType = os.arch();
                 osVersion = execSync("sw_vers -productVersion").toString().trim();
                 totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(0);
-                largeImageKey = "apple_m4";
-                smallImageKey = "apple";
             } catch {
                 systemOS = undefined;
                 archType = undefined;
@@ -117,7 +123,7 @@ async function setActivity(): Promise<void> {
     }
 
     await rpc.setActivity({
-        details: `OS: ${systemOS}`,
+        details: currentPlatform === "darwin" ? `OS: ${systemOS} ${macOsName}` : `OS: ${systemOS}`,
         state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${totalRam} GB` : `Total RAM: ${totalRam} GB`,
         largeImageKey: largeImageKey,
         largeImageText: `Architecture: ${archType}`,
