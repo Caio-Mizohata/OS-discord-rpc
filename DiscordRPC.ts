@@ -10,14 +10,16 @@ const currentPlatform = os.platform();
 let systemOS: string | undefined = undefined;
 let archType: string | undefined = undefined;
 let osVersion: string | undefined = undefined;
-let totalRam: string | undefined = undefined;
 
 let macOsName: string | undefined = undefined;
 let modelName: string | undefined = undefined;
 let appleChip: string | undefined = undefined;
+let totalRAM: string | undefined = undefined;
 
 let largeImageKey: string | undefined;
 let smallImageKey: string | undefined;
+
+let ramUsage: string | undefined;
 
 const AppID = process.env.APP_ID;
 if (!AppID) {
@@ -29,6 +31,10 @@ const rpc = new DiscordRPC.Client({ transport: "ipc" });
 
 async function setActivity(): Promise<void> {
     if (!rpc) return;
+
+    const total = os.totalmem() / 1024 / 1024 / 1024;
+    const free = os.freemem() / 1024 / 1024 / 1024;
+    const used = total - free;
 
     switch (currentPlatform) {
         case "darwin": {
@@ -54,22 +60,21 @@ async function setActivity(): Promise<void> {
                     largeImageKey = "apple_m4";
                     smallImageKey = "apple";
                 }
-
                 systemOS = execSync("sw_vers -productName").toString().trim();
                 modelName = detailedMacModel["Model Name"];
                 appleChip = detailedMacModel["Chip"];
                 archType = os.arch();
                 osVersion = execSync("sw_vers -productVersion").toString().trim();
-                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(0);
+                totalRAM = (os.totalmem() / 1024 / 1024 / 1024).toFixed(0);
             } catch {
                 systemOS = undefined;
                 archType = undefined;
                 osVersion = undefined;
-                totalRam = undefined;
                 modelName = undefined;
                 appleChip = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
+                totalRAM = undefined;
             }
             break;
         }
@@ -78,15 +83,15 @@ async function setActivity(): Promise<void> {
             try {
                 systemOS = os.version();
                 archType = os.arch();
+                ramUsage = `${used.toFixed(1)}`;
                 osVersion = os.release();
-                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
                 largeImageKey = "windows";
                 smallImageKey = "microsoft";
             } catch {
                 systemOS = undefined;
                 archType = undefined;
+                ramUsage = undefined;
                 osVersion = undefined;
-                totalRam = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
             }
@@ -102,14 +107,14 @@ async function setActivity(): Promise<void> {
                 systemOS = distroOutput.trim();
                 archType = os.arch();
                 osVersion = os.release();
-                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
+                ramUsage = `${used.toFixed(1)}`;
                 largeImageKey = "linux_mint";
                 smallImageKey = "terminal";
             } catch {
                 systemOS = undefined;
                 archType = undefined;
+                ramUsage = undefined;
                 osVersion = undefined;
-                totalRam = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
             }
@@ -117,14 +122,14 @@ async function setActivity(): Promise<void> {
         }
     }
 
-    if (!systemOS || !archType || !osVersion || !totalRam) {
-        console.error("Erro ao obter informações do sistema");
+    if (!systemOS || !archType || !osVersion || !ramUsage) {
+        console.error(`Erro ao obter informações do sistema: ${!systemOS ? "systemOS" : !archType ? "archType" : !osVersion ? "osVersion" : "ramUsage"} indefinido.`);
         return;
     }
 
     await rpc.setActivity({
         details: currentPlatform === "darwin" ? `OS: ${systemOS} ${macOsName}` : currentPlatform === "linux" ? `Distro: ${systemOS}` : `OS: ${systemOS}`,
-        state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${totalRam} GB` : `Total RAM: ${totalRam} GB`,
+        state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${ramUsage} GB` : `RAM usage: ${ramUsage} GB`,
         largeImageKey: largeImageKey,
         largeImageText: `Architecture: ${archType}`,
         smallImageKey: smallImageKey,
