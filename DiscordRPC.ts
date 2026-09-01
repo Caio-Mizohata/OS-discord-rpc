@@ -122,8 +122,8 @@ async function setActivity(): Promise<void> {
         }
     }
 
-    if (!systemOS || !archType || !osVersion || !ramUsage) {
-        console.error(`Erro ao obter informações do sistema: ${!systemOS ? "systemOS" : !archType ? "archType" : !osVersion ? "osVersion" : "ramUsage"} indefinido.`);
+    if (!systemOS || !archType || !osVersion) {
+        console.error(`Erro ao obter informações do sistema: ${!systemOS ? "systemOS" : !archType ? "archType" : !osVersion ? "osVersion" : !ramUsage ? "ramUsage" : ""} indefinido.`);
         return;
     }
 
