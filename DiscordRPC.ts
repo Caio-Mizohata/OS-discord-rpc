@@ -103,7 +103,7 @@ async function setActivity(): Promise<void> {
                 archType = os.arch();
                 osVersion = os.release();
                 totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
-                largeImageKey = "linux";
+                largeImageKey = "linux_mint";
                 smallImageKey = "terminal";
             } catch {
                 systemOS = undefined;
@@ -123,7 +123,7 @@ async function setActivity(): Promise<void> {
     }
 
     await rpc.setActivity({
-        details: currentPlatform === "darwin" ? `OS: ${systemOS} ${macOsName}` : `OS: ${systemOS}`,
+        details: currentPlatform === "darwin" ? `OS: ${systemOS} ${macOsName}` : currentPlatform === "linux" ? `Distro: ${systemOS}` : `OS: ${systemOS}`,
         state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${totalRam} GB` : `Total RAM: ${totalRam} GB`,
         largeImageKey: largeImageKey,
         largeImageText: `Architecture: ${archType}`,
