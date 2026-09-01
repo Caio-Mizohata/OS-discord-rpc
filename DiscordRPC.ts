@@ -129,7 +129,7 @@ async function setActivity(): Promise<void> {
 
     await rpc.setActivity({
         details: currentPlatform === "darwin" ? `OS: ${systemOS} ${macOsName}` : currentPlatform === "linux" ? `Distro: ${systemOS}` : `OS: ${systemOS}`,
-        state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${ramUsage} GB` : `RAM usage: ${ramUsage} GB`,
+        state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${totalRAM} GB` : `RAM usage: ${ramUsage} GB`,
         largeImageKey: largeImageKey,
         largeImageText: `Architecture: ${archType}`,
         smallImageKey: smallImageKey,
