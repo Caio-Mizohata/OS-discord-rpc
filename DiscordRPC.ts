@@ -104,7 +104,7 @@ async function setActivity(): Promise<void> {
                 osVersion = os.release();
                 totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
                 largeImageKey = "linux";
-                smallImageKey = undefined;
+                smallImageKey = "terminal";
             } catch {
                 systemOS = undefined;
                 archType = undefined;
