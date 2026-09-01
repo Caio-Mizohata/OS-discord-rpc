@@ -36,7 +36,7 @@ async function setActivity(): Promise<void> {
                     'system_profiler SPHardwareDataType 2>/dev/null | grep -E "Model Name|Chip"',
                     { encoding: "utf-8", shell: "/bin/bash" }
                 );
-                const detailedMacModel = Object.fromEntries(
+                const detailedMacModel: Record<string, string> = Object.fromEntries(
                     // Divide a saída em linhas
                     getMacModel.split("\n")
                         // Filtra linhas vazias
