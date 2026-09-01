@@ -1,25 +1,19 @@
-import DiscordRPC from "discord-rpc";
+import * as DiscordRPC from "discord-rpc";
 import os from "node:os";
 import { execSync } from "node:child_process";
 import dotenv from "dotenv";
 
 dotenv.config({ quiet: true });
 
-// const platformFormat: Record<string, string> = {
-//   darwin: "macOS",
-//   win32: "Windows",
-//   linux: "Linux",
-// };
-
 const currentPlatform = os.platform();
-const SystemOS = os.version();
-const archType = os.arch();
-const CPU = os.cpus()[0]?.model?.trim();
-const OsVersion = os.release();
-const totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
 
+let systemOS: string | undefined = undefined;
+let archType: string | undefined = undefined;
+let osVersion: string | undefined = undefined;
+let totalRam: string | undefined = undefined;
+let modelName: string | undefined = undefined;
+let appleChip: string | undefined = undefined;
 
-let osDetailedVersion: string | undefined;
 let largeImageKey: string | undefined;
 let smallImageKey: string | undefined;
 
@@ -37,11 +31,37 @@ async function setActivity(): Promise<void> {
     switch (currentPlatform) {
         case "darwin": {
             try {
-                osDetailedVersion = execSync("sw_vers -productVersion").toString().trim();
+                const getMacModel = execSync(
+                    // Executa o comando do terminal do MacOS para obter o modelo do Mac e o chip
+                    'system_profiler SPHardwareDataType 2>/dev/null | grep -E "Model Name|Chip"',
+                    { encoding: "utf-8", shell: "/bin/bash" }
+                );
+                const detailedMacModel = Object.fromEntries(
+                    // Divide a saída em linhas
+                    getMacModel.split("\n")
+                        // Filtra linhas vazias
+                        .filter(Boolean)
+                        // Separa os campos
+                        .map(line => line.split(":")
+                        // Remove espaços em branco
+                        .map(field => field.trim()))
+                );
+
+                modelName = detailedMacModel["Model Name"];
+                appleChip = detailedMacModel["Chip"];
+                systemOS = execSync("sw_vers -productName").toString().trim();
+                archType = os.arch();
+                osVersion = execSync("sw_vers -productVersion").toString().trim();
+                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
                 largeImageKey = "apple_m4";
                 smallImageKey = "apple";
             } catch {
-                osDetailedVersion = os.release();
+                systemOS = undefined;
+                archType = undefined;
+                osVersion = undefined;
+                totalRam = undefined;
+                modelName = undefined;
+                appleChip = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
             }
@@ -50,11 +70,17 @@ async function setActivity(): Promise<void> {
 
         case "win32": {
             try {
-                osDetailedVersion = os.release();
+                systemOS = os.version();
+                archType = os.arch();
+                osVersion = os.release();
+                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
                 largeImageKey = "windows";
                 smallImageKey = "microsoft";
             } catch {
-                osDetailedVersion = os.release();
+                systemOS = undefined;
+                archType = undefined;
+                osVersion = undefined;
+                totalRam = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
             }
@@ -67,9 +93,17 @@ async function setActivity(): Promise<void> {
                     'source /etc/os-release && echo "$PRETTY_NAME"',
                     { shell: "/bin/bash", encoding: "utf-8" }
                 );
-                osDetailedVersion = distroOutput.trim();
+                systemOS = distroOutput.trim();
+                archType = os.arch();
+                osVersion = os.release();
+                totalRam = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
+                largeImageKey = "linux";
+                smallImageKey = undefined;
             } catch {
-                osDetailedVersion = os.release();
+                systemOS = undefined;
+                archType = undefined;
+                osVersion = undefined;
+                totalRam = undefined;
                 largeImageKey = undefined;
                 smallImageKey = undefined;
             }
@@ -77,13 +111,18 @@ async function setActivity(): Promise<void> {
         }
     }
 
+    if (!systemOS || !archType || !osVersion || !totalRam || !largeImageKey || !smallImageKey) {
+        console.error("Erro ao obter informações do sistema");
+        process.exit(1);
+    }
+
     await rpc.setActivity({
-        details: `OS: ${SystemOS}`,
-        state: `Total RAM: ${totalRam} GB`,
+        details: `OS: ${systemOS}`,
+        state: currentPlatform === "darwin" ? `Model: ${modelName} ${appleChip?.replace(/Chip|Apple/g, "").trim()} ${totalRam} GB` : `Total RAM: ${totalRam} GB`,
         largeImageKey: largeImageKey,
         largeImageText: `Architecture: ${archType}`,
         smallImageKey: smallImageKey,
-        smallImageText: `OS Version: ${OsVersion}`,
+        smallImageText: `OS Version: ${osVersion}`,
         startTimestamp: Math.floor(Date.now() - os.uptime() * 1000),
         instance: false,
     });
