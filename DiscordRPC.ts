@@ -111,9 +111,9 @@ async function setActivity(): Promise<void> {
         }
     }
 
-    if (!systemOS || !archType || !osVersion || !totalRam || !largeImageKey || !smallImageKey) {
+    if (!systemOS || !archType || !osVersion || !totalRam) {
         console.error("Erro ao obter informações do sistema");
-        process.exit(1);
+        return;
     }
 
     await rpc.setActivity({
