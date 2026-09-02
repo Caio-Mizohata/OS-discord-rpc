@@ -44,7 +44,6 @@ Um Rich Presence customizado para Discord desenvolvido em **TypeScript** e **Nod
   - Sistema Operacional e Versão:
   - Arquitetura
   - Modelo do dispositivo e chip do processador:
-  - Consumo de Memória RAM: 
   - Tempo de Atividade (calculado em tempo real a partir do boot do sistema):
 
 ### Linux
