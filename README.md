@@ -28,7 +28,7 @@ Um Rich Presence customizado para Discord desenvolvido em **TypeScript** e **Nod
 
 ## 📸 Exemplos de Rich Presence que ficarão no seu perfil do Discord:
 
-### Windows 11 Pro
+### Windows 
 
 ![Windows](markdown/images/windows_example.png)
 - Exibe informações como:
@@ -47,7 +47,7 @@ Um Rich Presence customizado para Discord desenvolvido em **TypeScript** e **Nod
   - Consumo de Memória RAM: 
   - Tempo de Atividade (calculado em tempo real a partir do boot do sistema):
 
-### Linux (Imagem desatualizada)
+### Linux
 
 ![Linux](markdown/images/linux_example.png)
 - Exibe informações como:
