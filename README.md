@@ -22,7 +22,7 @@ Um Rich Presence customizado para Discord desenvolvido em **TypeScript** e **Nod
 
 - ### Notebook Linux Mint 
 
-> ### Se você utilizar um hardware ou sistema diferente destes dispositivos, pode ser que o Rich Presence não funcione corretamente, pois o código foi desenvolvido e testado especificamente para esses dispositivos. Para isso, você precisará alterar o código para que funcione corretamente no seu dispositivo.
+### Se você utilizar um hardware ou sistema diferente destes dispositivos, pode ser que o Rich Presence não funcione corretamente, pois o código foi desenvolvido e testado especificamente para esses dispositivos. Para isso, você precisará alterar o código para que funcione corretamente no seu dispositivo.
 
 ---
 
