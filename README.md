@@ -1,4 +1,4 @@
-# 💻 My Custom Discord RPC
+# 💻 OS Discord RPC
 
 Um Rich Presence customizado para Discord desenvolvido em **TypeScript** e **Node.js**, que detecta e exibe automaticamente informações em tempo real sobre seu sistema operacional, arquitetura, modelo de hardware e consumo de memória RAM no seu perfil do Discord.
 
